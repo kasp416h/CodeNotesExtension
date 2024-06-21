@@ -1,53 +1,70 @@
 import * as vscode from "vscode";
-import { firestore } from "./config/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { initializeApp, getApps, FirebaseOptions } from "firebase/app";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  Firestore,
+} from "firebase/firestore";
 
-import { Note } from "./types/Note";
+let firestore: Firestore;
 
-export function activate(context: vscode.ExtensionContext) {
-  console.log('Congratulations, your extension "codenotes" is now active!');
+function initializeFirebase() {
+  const config = vscode.workspace.getConfiguration("codenotes");
 
-  let disposable = vscode.commands.registerCommand(
-    "codenotes.showNotes",
-    async () => {
-      const collectionRef = await collection(firestore, "notes");
-      const snapshot = await getDocs(collectionRef);
-      const notes: Note[] = snapshot.docs.map((doc) => {
-        const data = doc.data();
-        return { content: data.content || "" };
-      });
+  const firebaseConfig: FirebaseOptions = {
+    apiKey: config.get("firebaseApiKey"),
+    authDomain: config.get("fire baseAuthDomain"),
+    projectId: config.get("firebaseProjectId"),
+    storageBucket: config.get("firebaseStorageBucket"),
+    messagingSenderId: config.get("firebaseMessagingSenderId"),
+    appId: config.get("firebaseAppId"),
+  };
 
-      const panel = vscode.window.createWebviewPanel(
-        "notes",
-        "Notes",
-        vscode.ViewColumn.One,
-        {}
-      );
-
-      panel.webview.html = getWebviewContent(notes);
-    }
-  );
-
-  context.subscriptions.push(disposable);
+  if (getApps().length === 0) {
+    const app = initializeApp(firebaseConfig);
+    firestore = getFirestore(app);
+  } else {
+    firestore = getFirestore();
+  }
 }
 
-function getWebviewContent(notes: { content: string }[]) {
-  return `
-	  <!DOCTYPE html>
-	  <html lang="en">
-	  <head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Notes</title>
-	  </head>
-	  <body>
-		<h1>Notes</h1>
-		<ul>
-		  ${notes.map((note) => `<li>${note.content}</li>`).join("")}
-		</ul>
-	  </body>
-	  </html>
-	`;
+class NotesViewProvider implements vscode.TreeDataProvider<NoteItem> {
+  private _onDidChangeTreeData: vscode.EventEmitter<
+    NoteItem | undefined | void
+  > = new vscode.EventEmitter<NoteItem | undefined | void>();
+
+  readonly onDidChangeTreeData: vscode.Event<NoteItem | undefined | void> =
+    this._onDidChangeTreeData.event;
+
+  async getChildren(): Promise<NoteItem[]> {
+    const collectionRef = await collection(firestore, "notes");
+    const snapshot = await getDocs(collectionRef);
+    return snapshot.docs.map((doc) => new NoteItem(doc.data().content));
+  }
+
+  getTreeItem(element: NoteItem): vscode.TreeItem {
+    return element;
+  }
+
+  refresh(): void {
+    this._onDidChangeTreeData.fire();
+  }
+}
+
+class NoteItem extends vscode.TreeItem {
+  constructor(public readonly label: string) {
+    super(label, vscode.TreeItemCollapsibleState.None);
+  }
+}
+
+export function activate(context: vscode.ExtensionContext) {
+  initializeFirebase();
+  const notesProvider = new NotesViewProvider();
+  vscode.window.registerTreeDataProvider("notesView", notesProvider);
+  vscode.commands.registerCommand("notesView.refresh", () =>
+    notesProvider.refresh()
+  );
 }
 
 export function deactivate() {}
