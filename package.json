@@ -1,7 +1,7 @@
 {
   "name": "codenotes",
   "displayName": "CodeNotes",
-  "description": "Easily see your notes, so you don't forget!",
+  "description": "Easily find your notes in vscode, so you don't forget!",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.90.0"
