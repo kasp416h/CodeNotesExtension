@@ -14,12 +14,59 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "codenotes.showNotes",
-        "title": "Show Notes"
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "codenotes",
+          "title": "CodeNotes",
+          "icon": "resources/notes-icon.png"
+        }
+      ]
+    },
+    "views": {
+      "codenotes": [
+        {
+          "id": "notesView",
+          "name": "Notes"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "CodeNotes Configuration",
+      "properties": {
+        "codenotes.firebaseApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "Firebase API Key"
+        },
+        "codenotes.firebaseAuthDomain": {
+          "type": "string",
+          "default": "",
+          "description": "Firebase Auth Domain"
+        },
+        "codenotes.firebaseProjectId": {
+          "type": "string",
+          "default": "",
+          "description": "Firebase Project ID"
+        },
+        "codenotes.firebaseStorageBucket": {
+          "type": "string",
+          "default": "",
+          "description": "Firebase Storage Bucket"
+        },
+        "codenotes.firebaseMessagingSenderId": {
+          "type": "string",
+          "default": "",
+          "description": "Firebase Messaging Sender ID"
+        },
+        "codenotes.firebaseAppId": {
+          "type": "string",
+          "default": "",
+          "description": "Firebase App ID"
+        }
       }
-    ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
