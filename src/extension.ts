@@ -1,11 +1,6 @@
 import * as vscode from "vscode";
 import { initializeApp, getApps, FirebaseOptions } from "firebase/app";
-import {
-  getFirestore,
-  collection,
-  getDocs,
-  Firestore,
-} from "firebase/firestore";
+import { getFirestore, doc, getDoc, Firestore } from "firebase/firestore";
 
 let firestore: Firestore;
 
@@ -33,14 +28,21 @@ class NotesViewProvider implements vscode.TreeDataProvider<NoteItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<
     NoteItem | undefined | void
   > = new vscode.EventEmitter<NoteItem | undefined | void>();
-
   readonly onDidChangeTreeData: vscode.Event<NoteItem | undefined | void> =
     this._onDidChangeTreeData.event;
 
   async getChildren(): Promise<NoteItem[]> {
-    const collectionRef = await collection(firestore, "notes");
-    const snapshot = await getDocs(collectionRef);
-    return snapshot.docs.map((doc) => new NoteItem(doc.data().content));
+    const docRef = doc(firestore, "notes", "tab1");
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const content = docSnap.data().content;
+      const lines = content.split("\\n");
+      console.log(lines);
+      return lines.map((line: any, index: any) => new NoteItem(line, index));
+    } else {
+      return [new NoteItem("No notes found.", 0)];
+    }
   }
 
   getTreeItem(element: NoteItem): vscode.TreeItem {
@@ -53,8 +55,12 @@ class NotesViewProvider implements vscode.TreeDataProvider<NoteItem> {
 }
 
 class NoteItem extends vscode.TreeItem {
-  constructor(public readonly label: string) {
+  constructor(
+    public readonly label: string,
+    public readonly lineIndex: number
+  ) {
     super(label, vscode.TreeItemCollapsibleState.None);
+    this.description = label;
   }
 }
 
