@@ -60,7 +60,6 @@ class NoteItem extends vscode.TreeItem {
     public readonly lineIndex: number
   ) {
     super(label, vscode.TreeItemCollapsibleState.None);
-    this.description = label;
   }
 }
 
@@ -68,9 +67,12 @@ export function activate(context: vscode.ExtensionContext) {
   initializeFirebase();
   const notesProvider = new NotesViewProvider();
   vscode.window.registerTreeDataProvider("notesView", notesProvider);
+
   vscode.commands.registerCommand("notesView.refresh", () =>
     notesProvider.refresh()
   );
+
+  notesProvider.refresh();
 }
 
 export function deactivate() {}

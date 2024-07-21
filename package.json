@@ -15,7 +15,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:codenotes.notesView"
+    "onView:codenotes.notesView",
+    "onCommand:notesView.refresh"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -33,6 +34,21 @@
         {
           "id": "notesView",
           "name": "Notes"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "notesView.refresh",
+        "title": "Refresh Notes"
+      }
+    ],
+    "menus": {
+      "view/item/context": [
+        {
+          "command": "notesView.refresh",
+          "when": "view == notesView",
+          "group": "inline"
         }
       ]
     },
