@@ -3,6 +3,11 @@
   "displayName": "CodeNotes",
   "description": "Easily find your notes in vscode, so you don't forget!",
   "version": "0.0.1",
+  "publisher": "kasp416h",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kasp416h/CodeNotesExtension.git"
+  },
   "engines": {
     "vscode": "^1.90.0"
   },
